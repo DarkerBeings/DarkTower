@@ -1,6 +1,8 @@
 #include <iostream>
 #include <cstdlib>
 #include <string.h>
+#include <conio.h>
+#include <cmath>
 // #ifdef _WIN32
 // #include <Windows.h>
 // #else
@@ -29,6 +31,7 @@ int bazaarRand(int select) {
     The bazaar is a place for the player to purchase warriors, food, and other helpful assistance for their journey.
     The bazaar will print a list of all 5 items to sell, along with their price.
     It will also include the option to haggle, which when used will decrease the price of a selected item by 1.
+    Could be changed to not include options scout, healer, or beast when they have already been bought.
 */
 void bazaar(Player *p) {
     int prices[5];
@@ -164,7 +167,10 @@ void bazaar(Player *p) {
 }
 
 /*
-    Prints out the fights. Prints number of warriors and number of brigands alive during a turn. Has time in between for suspense.
+    Prints out the skirmishes in a fight.
+    Prints number of warriors and number of brigands alive during a skirmish. 
+    Has time in between for suspense.
+    Needs to change to have sound input if a round is won or lost;
 */
 void fightPrint(Player *p, int brigs) {
         SetColor(2);
@@ -229,24 +235,65 @@ bool fight(Player *p, int brigs) {
     4. Plague. If you don't have a healer, lose 2 of your warriors. If you have a healer, gain 2 warriors instead.
     5. Dragon. Lose 1/4 of your warriors and gold. If you have a dragonsword, gain the dragon's hoard. 
         After defeating the dragon, a player loses their dragonsword.
-    return true if player gets another turn.
+    Return true if player gets another turn.
 */
 bool move(Player *p) {
-    int chance = rand() % 32 
+    int chance = rand() % 32;
 
     if (chance < 2) { // dragon
-
-    } 
+        SetColor(4);
+        cout << "Dragon Attack!!" << endl;
+        if (p->sword) {
+            SetColor(10);
+            cout << "You used your sword! The dragon is slain!" << endl;
+            p->warrior += p->warrior / 4;
+            p->updateGold(p->gold / 4);
+        } else {
+            cout << "You were overwhelmed by the Dragon! Your warriors and gold were taken!" << endl;
+            p->warrior = max(p->warrior - (int) (ceil(p->warrior / 4.0)), 1);
+            p->updateGold(-1 * p->gold / 4);
+        }
+        SetColor(6);
+        cout << p->warrior << " Warriors, " << p->gold << " Gold." << endl;
+        SetColor(7);
+        return false;
+    }   
     else if (chance < 7) { // lost
-
+        SetColor(8);
+        cout << "You got Lost!" << endl;
+        if (p->scout) {
+            SetColor(10);
+            cout << "Your scout found your way, gain another turn!";
+            SetColor(7);
+            return true;
+        } else {
+            cout << "After walking in circles, you find your way back to where you came from! \n Move back to your previous space." << endl;
+            SetColor(7);
+            return false;
+        }
     } 
     else if (chance < 12) { // plague
+        SetColor(5);
+        cout << "Your crew is infected with the plague!" << endl;
+        if (p->healer) {
+            SetColor(10);
+            cout << "Your healer got rid of the plague. 2 warriors joined your ranks." << endl;
+            p->warrior += 2;
+        } else {
+            cout << "You lost two of your warriors. The rest of your ranks got over themselves." << endl;
+            p->warrior = max(p->warrior - 2, 1);
+        }
+        SetColor(7);
+        return false;
 
     } 
     else if (chance < 22) { //safe
-        return true;
+        cout << "You move." << endl;
+        return false;
     } else { //battle
         fight(p, p->warrior + (rand() % 7) - 3);
+
+        return false;
     }
 
     return false;
@@ -261,6 +308,8 @@ bool move(Player *p) {
     3. Treasure. Earn one of the treasures without needing to fight a battle.
 */
 void tombRuins(Player *p) {
+    int chance = rand() % 16;
+
 
 }
 
@@ -292,10 +341,18 @@ void sanctuary(Player *p) {
         p->updateGold(rand() % 30 + 5);
         p->food += rand() % 10 + 10;
     }
-
+    SetColor(6);
     cout << p->warrior << " Warriors, " << p->gold << " Gold, " << p->food << " Food.\n" << endl;
-
+    SetColor(7);
     return;
+}
+
+/*
+    Fight the Dark Tower!
+*/
+bool darkTower(Player *p) {
+
+    return false;
 }
 
 
@@ -304,22 +361,85 @@ void sanctuary(Player *p) {
 */
 int main (int argc, char *argv[]) {
     srand(time(0));
-    
-    Player p;
-    p.printInventory();
-    fight(&p, 50);
-    p.printInventory();
+    cout << "Input the number of players in your game." << endl;
+    int players;
+    cin >> players;
+
+    Player p[players];
+    for (int i = 0; i < players; i++) {
+        p[i].printInventory();
+    }
+
+    if (players < 0 || players > 3) {
+        players = max(players, 0);
+        players = min(players, 3);
+    }
+
+    int curPlayer = 0;
+    bool gameWin = false;
+
+    while(!gameWin) {
+        bool turn = true;
+
+        while(turn) {
+            cout << "Player " << curPlayer + 1 << "'s turn.\n" <<
+            "(1) Move\n" <<
+            "(2) Inventory\n" <<
+            "(3) Frontier\n" <<
+            "(4) Tomb / Ruin\n" <<
+            "(5) Citadel / Sanctuary\n" <<
+            "(6) Bazaar\n" <<
+            "(7) Dark Tower\n";
+
+            int choice;
+            cin >> choice;
+
+            switch(choice) {
+                case 1:
+                    turn = move(&p[curPlayer]);
+                    break;
+                case 2:
+                    p[curPlayer].printInventory();
+                    turn = false;
+                    break;
+                case 3:
+                    p[curPlayer].onFrontier();
+                    turn = false;
+                    break;
+                case 4:
+                    tombRuins(&p[curPlayer]);
+                    turn = false;
+                    break;
+                case 5:
+                    sanctuary(&p[curPlayer]);
+                    turn = false;
+                    break;
+                case 6:
+                    bazaar(&p[curPlayer]);
+                    break;
+                case 7:
+                    gameWin = darkTower(&p[curPlayer]);
+                    turn = false;
+                    break;
+                default:
+                    cout << "You cannot do that." << endl;
+                    turn = true;
+                    break;
+            } 
+
+
+        }
+
+        //Increase the turn count
+        cout << -1 * (curPlayer + 1) << endl;        
+        curPlayer = (curPlayer + 1) % players;
+        // while(cin.get().equals('')) {
+
+        // }
+        
+    }
 
     
-    // bazaar(&p);
-    // p.print();
-    // string name;
-    // int age;
-
-    // cin >> name >> age;
-
-    // cout << "Name : " << name << endl;
-    // cout << "Age : " << age << endl;
     return 0;
 }
 

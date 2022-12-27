@@ -76,16 +76,19 @@ public:
     */
     void updateGold(int add) {
         this->gold += add;
-        this->gold = min(this->gold, this->warrior * 6 + (this->beast * 50));
+        int goldmax = this->warrior * 6;
+        if(beast) goldmax += 50;
+        this->gold = min(this->gold, goldmax);
+        this->gold = max(this->gold, 0);
     }
 
     /*
         Increases player's frontier count by 1. 
         Plays sound of new frontier.
     */
-    void frontier() {
-        frontier += 1;
-    }
+    void onFrontier() {
+        this->frontier += 1;
+    };
 };
 
 void getTreasure(Player *p) {
