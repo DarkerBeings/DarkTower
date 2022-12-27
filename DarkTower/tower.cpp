@@ -431,11 +431,10 @@ int main (int argc, char *argv[]) {
         }
 
         //Increase the turn count
-        cout << -1 * (curPlayer + 1) << endl;        
+        cout << -1 * (curPlayer + 1) << endl; 
+        cin.ingnore();
         curPlayer = (curPlayer + 1) % players;
-        // while(cin.get().equals('')) {
-
-        // }
+        
         
     }
 
