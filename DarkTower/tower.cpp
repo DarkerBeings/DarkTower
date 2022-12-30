@@ -60,6 +60,7 @@ void bazaar(Player *p) {
 
         SetColor(7);
         cout << "Input Select & Amount or Input Haggle & Select as integers in Format: xx yy" << endl;
+        cin.clear();
         cin >> select >> amount;
         if (select == 6) { //If your number is out of bounds, close bazaar
             if (amount < 1 || amount > 5) {
@@ -393,6 +394,14 @@ int main (int argc, char *argv[]) {
 
             int choice;
             cin >> choice;
+            
+             while (!cin)
+                {
+                    cin.clear();
+                    cin.ignore(10000, '\n');
+                    cout << "That is not a correct input." << endl;
+                    cin >> choice;
+                }
 
             switch(choice) {
                 case 1:
@@ -422,7 +431,8 @@ int main (int argc, char *argv[]) {
                     turn = false;
                     break;
                 default:
-                    cout << "You cannot do that." << endl;
+                    cin.clear();
+                    cout << "Wrong Number." << endl;
                     turn = true;
                     break;
             } 
@@ -432,7 +442,8 @@ int main (int argc, char *argv[]) {
 
         //Increase the turn count
         cout << -1 * (curPlayer + 1) << endl; 
-        cin.ingnore();
+        cout << "Press Anything To Continue" << endl;
+        getch();
         curPlayer = (curPlayer + 1) % players;
         
         
