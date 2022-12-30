@@ -310,6 +310,14 @@ bool move(Player *p) {
 */
 void tombRuins(Player *p) {
     int chance = rand() % 16;
+    if (chance < 4) {
+        cout << "There is nothing here." << endl;
+        
+    } else if (chance < 12) {
+        fight(p, p->warrior + (rand() % 7) - 3);
+    } else {
+        getTreasure(p);
+    }
 
 
 }
@@ -350,6 +358,9 @@ void sanctuary(Player *p) {
 
 /*
     Fight the Dark Tower!
+    To enter the dark tower, a player must first collect all three keys. 
+    Then, a player will have to guess which combination of keys unlocks the tower. 
+    Lastly, the player must win in a fight against a large number of brigands. 
 */
 bool darkTower(Player *p) {
 
@@ -362,6 +373,7 @@ bool darkTower(Player *p) {
 */
 int main (int argc, char *argv[]) {
     srand(time(0));
+    int keyCombo[3];
     cout << "Input the number of players in your game." << endl;
     int players;
     cin >> players;
